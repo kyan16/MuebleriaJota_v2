@@ -6,7 +6,10 @@ function ProductList({
   productos = [],
   onSelectProduct,
   onAddToCart,
-  mostrarBuscador = true
+  mostrarBuscador = true,
+  cargando = false,
+  error = null,
+  onReintentar
 }) {
   const [busqueda, setBusqueda] = useState('');
 
@@ -22,38 +25,61 @@ function ProductList({
     });
   }, [productos, busqueda]);
 
-  return (
-    <section className="section catalog-section">
-      {mostrarBuscador && (
-        <>
-          <label className="search-label" htmlFor="search">
-            Buscar producto
-          </label>
-          <input
-            id="search"
-            className="search-input"
-            type="search"
-            placeholder="Ej: sillón, mesa, silla..."
-            value={busqueda}
-            onChange={(e) => setBusqueda(e.target.value)}
-          />
-        </>
-      )}
-
-      <div id="product-grid" className="product-grid">
-        {productosFiltrados.length === 0 ? (
-          <p>No encontramos productos.</p>
-        ) : (
-          productosFiltrados.map((producto) => (
-            <ProductCard
-              key={producto.id}
-              producto={producto}
-              onSelect={onSelectProduct}
-              onAddToCart={onAddToCart}
-            />
-          ))
+  // Contenido de la grilla según el ciclo de la petición: cargando, error o éxito
+  let contenido;
+  if (cargando) {
+    contenido = (
+      <p className="grid-status" role="status">
+        Cargando catálogo...
+      </p>
+    );
+  } else if (error) {
+    contenido = (
+      <div className="grid-status" role="alert">
+        <p>{error}</p>
+        {onReintentar && (
+          <button type="button" className="btn" onClick={onReintentar}>
+            REINTENTAR
+          </button>
         )}
       </div>
+    );
+  } else if (productosFiltrados.length === 0) {
+    contenido = <p className="grid-status">No encontramos productos.</p>;
+  } else {
+    contenido = productosFiltrados.map((producto) => (
+      <ProductCard
+        key={producto.id}
+        producto={producto}
+        onSelect={onSelectProduct}
+        onAddToCart={onAddToCart}
+      />
+    ));
+  }
+
+  const grilla = (
+    <div id={mostrarBuscador ? 'product-grid' : 'featured-products'} className="product-grid">
+      {contenido}
+    </div>
+  );
+
+  // En la portada solo se muestra la grilla; en el catálogo, buscador + grilla
+  if (!mostrarBuscador) return grilla;
+
+  return (
+    <section className="section catalog-section">
+      <label className="search-label" htmlFor="search">
+        Buscar producto
+      </label>
+      <input
+        id="search"
+        className="search-input"
+        type="search"
+        placeholder="Ej: sillón, mesa, silla..."
+        value={busqueda}
+        onChange={(e) => setBusqueda(e.target.value)}
+      />
+      {grilla}
     </section>
   );
 }

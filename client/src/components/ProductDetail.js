@@ -22,7 +22,7 @@ function ProductDetail({ producto, onAddToCart, onBack }) {
 
   const handleAdd = () => {
     if (onAddToCart) {
-      onAddToCart(producto);
+      onAddToCart(producto.id);
     }
     setMensaje('Producto añadido al carrito.');
   };
@@ -41,8 +41,8 @@ function ProductDetail({ producto, onAddToCart, onBack }) {
 
           {especificaciones && especificaciones.length > 0 && (
             <dl className="specs-table">
-              {especificaciones.map((spec, index) => (
-                <div key={index} className="specs-row">
+              {especificaciones.map((spec) => (
+                <div key={spec.label} className="specs-row">
                   <dt>{spec.label}</dt>
                   <dd>{spec.value}</dd>
                 </div>
