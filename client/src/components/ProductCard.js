@@ -16,7 +16,7 @@ function ProductCard({ producto, onSelect, onAddToCart }) {
   const handleAddClick = (e) => {
     e.stopPropagation();
     if (onAddToCart) {
-      onAddToCart(producto);
+      onAddToCart(id);
     }
   };
 

@@ -1,15 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ProductList from './components/ProductList';
 import ProductDetail from './components/ProductDetail';
 import ContactForm from './components/ContactForm';
-import { mockProductos } from './data/mockProductos';
-import { formatoPrecio } from './utils/format';
+import Cart from './components/Cart';
 
 function App() {
-  // Estado de productos (datos temporales / mock por ahora)
-  const [productos] = useState(mockProductos);
+  // Estado de productos (vienen de la API) y ciclo de vida de la petición
+  const [productos, setProductos] = useState([]);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState(null);
+
+  const cargarProductos = useCallback(async (signal) => {
+    setCargando(true);
+    setError(null);
+    try {
+      const respuesta = await fetch('/api/productos', { signal });
+      if (!respuesta.ok) {
+        throw new Error(`Error ${respuesta.status} al pedir los productos`);
+      }
+      const datos = await respuesta.json();
+      setProductos(datos);
+    } catch (err) {
+      if (err.name === 'AbortError') return;
+      setError('No pudimos cargar el catálogo. Verificá que el servidor esté activo e intentá de nuevo.');
+    } finally {
+      if (!signal || !signal.aborted) setCargando(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const controlador = new AbortController();
+    cargarProductos(controlador.signal);
+    return () => controlador.abort();
+  }, [cargarProductos]);
 
   // Estado de navegación y vistas
   const [seccionActiva, setSeccionActiva] = useState('inicio');
@@ -21,8 +46,7 @@ function App() {
   const [carrito, setCarrito] = useState([]);
 
   // Acciones del carrito
-  const handleAddToCart = (producto) => {
-    const id = typeof producto === 'object' ? producto.id : producto;
+  const handleAddToCart = (id) => {
     setCarrito((prev) => [...prev, id]);
   };
 
@@ -75,8 +99,8 @@ function App() {
     0
   );
 
-  // Productos destacados para la portada (4 productos)
-  const productosDestacados = productos.slice(0, 4);
+  // Productos destacados para la portada (campo `destacado` de la API)
+  const productosDestacados = productos.filter((producto) => producto.destacado);
 
   return (
     <div className="App">
@@ -92,19 +116,14 @@ function App() {
           <ProductDetail
             producto={productoSeleccionado}
             onAddToCart={handleAddToCart}
-            onBack={() => setProductoSeleccionado(null)}
+            onBack={() => handleNavigate('catalogo')}
           />
         ) : (
           <>
             {/* Sección: Inicio (Hero + Destacados + Sustentabilidad) */}
             {seccionActiva === 'inicio' && (
               <>
-                <section
-                  className="hero"
-                  style={{
-                    backgroundImage: `linear-gradient(105deg, rgba(35,25,20,.82) 0%, rgba(44,41,38,.6) 38%, rgba(44,41,38,.25) 65%, rgba(44,41,38,.1) 100%), linear-gradient(0deg, rgba(25,18,14,.75) 0%, rgba(25,18,14,.3) 50%, transparent 100%), url("/img/imagen-principal.jpg")`
-                  }}
-                >
+                <section className="hero">
                   <div className="hero-content">
                     <p className="eyebrow">MUEBLES CON HISTORIA</p>
                     <h1>Diseño que honra el pasado y abraza el futuro.</h1>
@@ -128,14 +147,15 @@ function App() {
                     <h2>Piezas destacadas</h2>
                     <p>Descubrí muebles pensados para formar parte de tu historia.</p>
                   </div>
-                  <div id="featured-products" className="product-grid">
-                    <ProductList
-                      productos={productosDestacados}
-                      onSelectProduct={handleSelectProduct}
-                      onAddToCart={handleAddToCart}
-                      mostrarBuscador={false}
-                    />
-                  </div>
+                  <ProductList
+                    productos={productosDestacados}
+                    onSelectProduct={handleSelectProduct}
+                    onAddToCart={handleAddToCart}
+                    mostrarBuscador={false}
+                    cargando={cargando}
+                    error={error}
+                    onReintentar={() => cargarProductos()}
+                  />
                 </section>
 
                 <section className="sustainability">
@@ -172,6 +192,9 @@ function App() {
                   onSelectProduct={handleSelectProduct}
                   onAddToCart={handleAddToCart}
                   mostrarBuscador={true}
+                  cargando={cargando}
+                  error={error}
+                  onReintentar={() => cargarProductos()}
                 />
               </>
             )}
@@ -198,91 +221,16 @@ function App() {
                   <p>Revisá tus piezas antes de continuar.</p>
                 </section>
 
-                <section className="cart-section">
-                  <div id="cart-items" className="cart-list">
-                    {itemsCarrito.length === 0 ? (
-                      <div className="cart-empty">
-                        <p>Tu carrito está vacío.</p>
-                        <button
-                          type="button"
-                          className="text-link"
-                          onClick={() => handleNavigate('catalogo')}
-                        >
-                          Ver catálogo →
-                        </button>
-                      </div>
-                    ) : (
-                      itemsCarrito.map(({ producto, cantidad }) => {
-                        const imageSrc = producto.imagen.startsWith('/')
-                          ? producto.imagen
-                          : `/${producto.imagen}`;
-                        return (
-                          <article key={producto.id} className="cart-item">
-                            <div className="cart-item-image">
-                              <img src={imageSrc} alt={producto.nombre} />
-                            </div>
-                            <div className="cart-item-info">
-                              <p className="category">{producto.categoria}</p>
-                              <h3>{producto.nombre}</h3>
-                              <p className="price">{formatoPrecio(producto.precio)}</p>
-                            </div>
-                            <div className="cart-item-qty">
-                              <button
-                                type="button"
-                                className="qty-btn"
-                                onClick={() => handleQuitarUnidad(producto.id)}
-                                aria-label={`Quitar una unidad de ${producto.nombre}`}
-                              >
-                                −
-                              </button>
-                              <span>{cantidad}</span>
-                              <button
-                                type="button"
-                                className="qty-btn"
-                                onClick={() => handleAddToCart(producto.id)}
-                                aria-label={`Agregar una unidad de ${producto.nombre}`}
-                              >
-                                +
-                              </button>
-                            </div>
-                            <p className="cart-item-subtotal">
-                              {formatoPrecio(producto.precio * cantidad)}
-                            </p>
-                            <button
-                              type="button"
-                              className="cart-item-remove"
-                              onClick={() => handleEliminarProducto(producto.id)}
-                              aria-label={`Eliminar ${producto.nombre} del carrito`}
-                            >
-                              Eliminar
-                            </button>
-                          </article>
-                        );
-                      })
-                    )}
-                  </div>
-
-                  <aside className="cart-summary">
-                    <h2>Resumen</h2>
-                    <p className="cart-summary-row">
-                      <span>Unidades</span>
-                      <span id="cart-summary-count">{carrito.length}</span>
-                    </p>
-                    <p className="cart-summary-total">
-                      <span>Total</span>
-                      <span id="cart-total">{formatoPrecio(totalCarrito)}</span>
-                    </p>
-                    <button
-                      id="cart-clear"
-                      type="button"
-                      className="btn-outline"
-                      disabled={carrito.length === 0}
-                      onClick={handleVaciarCarrito}
-                    >
-                      VACIAR CARRITO
-                    </button>
-                  </aside>
-                </section>
+                <Cart
+                  items={itemsCarrito}
+                  totalUnidades={carrito.length}
+                  total={totalCarrito}
+                  onNavigate={handleNavigate}
+                  onAgregar={handleAddToCart}
+                  onQuitarUnidad={handleQuitarUnidad}
+                  onEliminar={handleEliminarProducto}
+                  onVaciar={handleVaciarCarrito}
+                />
               </>
             )}
           </>
