@@ -3,13 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "http-proxy-middleware": "^2.0.6",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^13.5.0",
+    "http-proxy-middleware": "^2.0.6",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
+    "react-router-dom": "^7.18.4",
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4"
   },
@@ -36,5 +37,12 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "jest": {
+    "moduleNameMapper": {
+      "^react-router/dom$": "<rootDir>/node_modules/react-router/dist/development/dom-export.js",
+      "^react-router$": "<rootDir>/node_modules/react-router/dist/development/index.js",
+      "^react-router-dom$": "<rootDir>/node_modules/react-router-dom/dist/index.js"
+    }
   }
 }
