@@ -52,6 +52,8 @@ beforeAll(() => {
 });
 
 beforeEach(() => {
+  window.localStorage.clear();
+  window.history.pushState({}, '', '/');
   global.fetch = jest.fn(respuestaOk);
 });
 
@@ -177,4 +179,57 @@ describe('Hermanos Jota — Componentes, navegación y API', () => {
     );
     expect(nameInput.value).toBe('');
   });
+
+  test('React Router: Los enlaces de navegación cambian la URL correspondientemente sin recargar', async () => {
+    await renderApp();
+
+    expect(window.location.pathname).toBe('/');
+
+    fireEvent.click(screen.getByRole('button', { name: /^catálogo$/i }));
+    expect(window.location.pathname).toBe('/productos');
+
+    fireEvent.click(screen.getByRole('button', { name: /^contacto$/i }));
+    expect(window.location.pathname).toBe('/contacto');
+
+    fireEvent.click(screen.getByRole('button', { name: /^inicio$/i }));
+    expect(window.location.pathname).toBe('/');
+  });
+
+  test('Persistencia: el carrito se guarda en localStorage al agregar productos y se actualiza al vaciar', async () => {
+    await renderApp();
+
+    const botonesAñadir = screen.getAllByRole('button', { name: /^añadir$/i });
+    fireEvent.click(botonesAñadir[0]);
+
+    // Debe guardarse en localStorage
+    expect(JSON.parse(window.localStorage.getItem('carrito'))).toEqual([3]);
+
+    fireEvent.click(botonesAñadir[0]);
+    expect(JSON.parse(window.localStorage.getItem('carrito'))).toEqual([3, 3]);
+
+    fireEvent.click(screen.getByRole('button', { name: /ver carrito de compras/i }));
+    fireEvent.click(screen.getByRole('button', { name: /vaciar carrito/i }));
+    expect(JSON.parse(window.localStorage.getItem('carrito'))).toEqual([]);
+  });
+
+  test('Persistencia: recupera los productos desde localStorage al recargar/iniciar la app', async () => {
+    // Simulamos que el usuario tenía productos guardados previamente
+    window.localStorage.setItem('carrito', JSON.stringify([1, 2]));
+
+    render(<App />);
+    expect(await screen.findByText('Butaca Mendoza')).toBeInTheDocument();
+
+    // El contador del carrito en el Navbar debe mostrar 2 inmediatamente
+    expect(document.querySelector('#cart-count')).toHaveTextContent('2');
+  });
+
+  test('Persistencia: si localStorage tiene contenido no válido, no se rompe y usa array vacío', async () => {
+    window.localStorage.setItem('carrito', 'invalid-json{{{');
+
+    render(<App />);
+    expect(await screen.findByText('Butaca Mendoza')).toBeInTheDocument();
+    expect(document.querySelector('#cart-count')).toHaveTextContent('0');
+  });
 });
+
+
