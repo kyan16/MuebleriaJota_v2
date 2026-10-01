@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { formatoPrecio } from '../utils/format';
+import { activarFeedbackCarrito } from '../utils/cartFeedback';
 
 function ProductDetail({ producto, onAddToCart, onBack }) {
   const [mensaje, setMensaje] = useState('');
@@ -20,11 +21,12 @@ function ProductDetail({ producto, onAddToCart, onBack }) {
   const { nombre, precio, categoria, imagen, descripcion, especificaciones } = producto;
   const imageSrc = imagen.startsWith('/') ? imagen : `/${imagen}`;
 
-  const handleAdd = () => {
+  const handleAdd = (mensajeTexto = 'Producto añadido al carrito.', boton) => {
     if (onAddToCart) {
       onAddToCart(producto.id);
     }
-    setMensaje('Producto añadido al carrito.');
+    activarFeedbackCarrito(boton);
+    setMensaje(mensajeTexto);
   };
 
   return (
@@ -55,7 +57,7 @@ function ProductDetail({ producto, onAddToCart, onBack }) {
               id="add-detail"
               type="button"
               className="btn"
-              onClick={handleAdd}
+              onClick={(evento) => handleAdd('Producto añadido al carrito.', evento.currentTarget)}
             >
               AÑADIR AL CARRITO
             </button>

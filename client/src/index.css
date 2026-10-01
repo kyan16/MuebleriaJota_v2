@@ -89,6 +89,14 @@ h2,
   transform: translateY(-2px);
 }
 
+.btn-buy {
+  background: var(--oro);
+}
+
+.btn-buy:hover {
+  background: #bf8a22;
+}
+
 .btn-small {
   width: 100%;
   padding: .9rem 1rem;
@@ -231,6 +239,29 @@ h2,
   align-items: center;
   justify-content: center;
   line-height: 1;
+  transform-origin: center;
+}
+
+.cart-badge.cart-bump {
+  animation: cart-bump .45s ease;
+}
+
+@keyframes cart-bump {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.28); }
+  60% { transform: scale(.96); }
+  100% { transform: scale(1); }
+}
+
+.cart-add-feedback {
+  animation: cart-add-feedback .5s ease;
+}
+
+@keyframes cart-add-feedback {
+  0% { transform: scale(1); }
+  35% { transform: scale(.95); }
+  70% { transform: scale(1.05); }
+  100% { transform: scale(1); }
 }
 
 /* ==========================================================================
@@ -400,6 +431,12 @@ h2,
 .product-card:hover {
   transform: translateY(-3px);
   box-shadow: 0 6px 16px rgba(44,41,38,.08);
+}
+
+.product-card-actions {
+  display: grid;
+  gap: .7rem;
+  padding: 0 1rem 1rem;
 }
 
 .product-card-link {
@@ -809,6 +846,9 @@ h2,
   align-self: start;
   background: var(--blanco);
   padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: .8rem;
 }
 
 .cart-summary h2 {
@@ -828,6 +868,72 @@ h2,
   font-size: 1.2rem;
   font-weight: 700;
   padding-top: .8rem;
+}
+
+.cart-summary-actions {
+  display: grid;
+  gap: .8rem;
+  margin-top: .4rem;
+}
+
+.cart-buy,
+#cart-clear {
+  width: 100%;
+}
+
+.cart-purchase-message {
+  color: var(--salvia);
+  font-weight: 700;
+  font-size: .85rem;
+  margin-top: .3rem;
+}
+
+.cart-buy {
+  animation: cart-buy-enter .45s ease-out both;
+  color: var(--texto);
+  margin-bottom: .75rem;
+  width: 100%;
+}
+
+.cart-purchase-message {
+  animation: cart-message-enter .35s ease-out both;
+  border-left: 3px solid var(--salvia);
+  color: var(--texto);
+  font-size: .85rem;
+  margin-bottom: .75rem;
+  padding: .5rem .75rem;
+}
+
+@keyframes cart-buy-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes cart-message-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cart-add-feedback,
+  .cart-buy,
+  .cart-purchase-message {
+    animation: none;
+  }
 }
 
 @media (min-width: 768px) {
