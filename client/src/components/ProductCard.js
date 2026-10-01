@@ -1,5 +1,6 @@
 import React from 'react';
 import { formatoPrecio } from '../utils/format';
+import { activarFeedbackCarrito } from '../utils/cartFeedback';
 
 function ProductCard({ producto, onSelect, onAddToCart }) {
   if (!producto) return null;
@@ -18,6 +19,7 @@ function ProductCard({ producto, onSelect, onAddToCart }) {
     if (onAddToCart) {
       onAddToCart(id);
     }
+    activarFeedbackCarrito(e.currentTarget);
   };
 
   return (
@@ -43,14 +45,16 @@ function ProductCard({ producto, onSelect, onAddToCart }) {
           <p className="price">{formatoPrecio(precio)}</p>
         </div>
       </div>
-      <button
-        type="button"
-        className="btn btn-small"
-        data-id={id}
-        onClick={handleAddClick}
-      >
-        AÑADIR
-      </button>
+      <div className="product-card-actions">
+        <button
+          type="button"
+          className="btn btn-small"
+          data-id={id}
+          onClick={handleAddClick}
+        >
+          AÑADIR
+        </button>
+      </div>
     </article>
   );
 }

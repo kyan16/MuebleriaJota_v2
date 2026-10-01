@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { formatoPrecio } from '../utils/format';
 
 function Cart({
@@ -11,6 +11,8 @@ function Cart({
   onEliminar,
   onVaciar
 }) {
+  const [compraIniciada, setCompraIniciada] = useState(false);
+
   return (
     <section className="cart-section">
       <div id="cart-items" className="cart-list">
@@ -80,15 +82,33 @@ function Cart({
           <span>Total</span>
           <span id="cart-total">{formatoPrecio(total)}</span>
         </p>
-        <button
-          id="cart-clear"
-          type="button"
-          className="btn-outline"
-          disabled={totalUnidades === 0}
-          onClick={onVaciar}
-        >
-          VACIAR CARRITO
-        </button>
+
+        <div className="cart-summary-actions">
+          <button
+            type="button"
+            className="btn btn-buy cart-buy"
+            disabled={totalUnidades === 0}
+            onClick={() => setCompraIniciada(true)}
+          >
+            COMPRAR
+          </button>
+
+          <button
+            id="cart-clear"
+            type="button"
+            className="btn-outline"
+            disabled={totalUnidades === 0}
+            onClick={onVaciar}
+          >
+            VACIAR CARRITO
+          </button>
+        </div>
+
+        {compraIniciada && (
+          <p className="cart-purchase-message" role="status">
+            Esta demo no procesa pagos ni confirma pedidos.
+          </p>
+        )}
       </aside>
     </section>
   );
