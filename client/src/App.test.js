@@ -129,6 +129,8 @@ describe('Hermanos Jota — Componentes, navegación y API', () => {
     fireEvent.click(screen.getByRole('button', { name: /añadir al carrito/i }));
     expect(screen.getByText('Producto añadido al carrito.')).toBeInTheDocument();
     expect(document.querySelector('#cart-count')).toHaveTextContent('1');
+    expect(document.querySelector('#cart-count')).toHaveClass('cart-bump');
+    expect(screen.getByRole('button', { name: /añadir al carrito/i })).toHaveClass('cart-add-feedback');
 
     fireEvent.click(screen.getByRole('button', { name: /volver al catálogo →/i }));
     expect(screen.getByPlaceholderText(/ej: sillón, mesa, silla/i)).toBeInTheDocument();
@@ -147,12 +149,18 @@ describe('Hermanos Jota — Componentes, navegación y API', () => {
     expect(screen.getByText('Butaca Mendoza')).toBeInTheDocument();
     expect(document.querySelector('#cart-total')).toHaveTextContent(/760\.000/);
 
+    const botonComprar = screen.getByRole('button', { name: /comprar/i });
+    expect(botonComprar).toBeEnabled();
+    fireEvent.click(botonComprar);
+    expect(screen.getByRole('status')).toHaveTextContent(/esta demo no procesa pagos/i);
+
     fireEvent.click(screen.getByRole('button', { name: /quitar una unidad de butaca mendoza/i }));
     expect(document.querySelector('#cart-total')).toHaveTextContent(/380\.000/);
 
     fireEvent.click(screen.getByRole('button', { name: /vaciar carrito/i }));
     expect(screen.getByText(/tu carrito está vacío/i)).toBeInTheDocument();
     expect(document.querySelector('#cart-count')).toHaveTextContent('0');
+    expect(screen.getByRole('button', { name: /comprar/i })).toBeDisabled();
   });
 
   test('Permite navegar a Contacto y enviar el formulario controlado', async () => {
