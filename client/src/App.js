@@ -196,6 +196,7 @@ function AppContent() {
   // Estado del producto seleccionado para vista de detalle
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
 
+  // Registro de actividad del proyecto para dejar seguimiento en GitHub.
   // Clave de almacenamiento en localStorage
   const STORAGE_KEY = 'carrito';
 
