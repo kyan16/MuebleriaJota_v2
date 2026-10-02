@@ -6,7 +6,6 @@ Instrucciones para agentes de IA que trabajan en este repositorio. Leer **antes*
 
 E-commerce cliente-servidor de una mueblería ficticia. Frontend **React 19 + react-router-dom 7** (`client/`, creado con `react-scripts`/CRA) y API REST propia con **Node.js + Express 5** (`backend/`). Sin base de datos: los productos viven en un array JS.
 
-`ESPECIFICACION.md` describe la **versión anterior** del proyecto (HTML/CSS/JS vanilla, 5 páginas estáticas). Sirve como **fuente de verdad de diseño, contenido y copy**, pero su capítulo 3.2 (prohibir React y npm) ya no aplica: acá el stack es React + Express. No "corregir" el código para volver al vanilla.
 
 ## Comandos
 
