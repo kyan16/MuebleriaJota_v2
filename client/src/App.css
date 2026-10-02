@@ -1,5 +1,11 @@
+/* Previene scroll horizontal en toda la app */
+html, body, #root {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
 .App {
-  text-align: center;
+  text-align: left;
 }
 
 .App-logo {
