@@ -61,10 +61,6 @@
   padding: 0;
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
 body {
   background: var(--alabastro);
   color: var(--texto);
@@ -83,6 +79,11 @@ a {
 img {
   display: block;
   max-width: 100%;
+}
+
+/* Evita que el pie salte al pasar de una página larga a una corta */
+main {
+  min-height: 60vh;
 }
 
 /* --------------------------------------------------------------------------
@@ -794,7 +795,9 @@ h2,
     transform var(--transition-base),
     box-shadow var(--transition-base),
     border-color var(--transition-base);
-  animation: fade-up .4s ease both;
+  /* `backwards` y no `both`: con `forwards` la animación mantiene
+     `transform` bloqueado en el origen Animación y anula el :hover */
+  animation: fade-up .4s ease backwards;
 }
 
 /* Escalonado de animación de entrada */
@@ -920,7 +923,7 @@ h2,
   grid-template-columns: 1fr;
   gap: 3rem;
   align-items: start;
-  animation: fade-up .5s ease both;
+  animation: fade-up .5s ease backwards;
 }
 
 .detail-image {
