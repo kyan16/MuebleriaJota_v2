@@ -1,53 +1,78 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 
 function Navbar({ cantidadCarrito = 0 }) {
+  const [menuAbierto, setMenuAbierto] = useState(false);
+
+  // Cierra el menú al navegar
+  const cerrarMenu = () => setMenuAbierto(false);
+
   return (
     <header className="header">
-      <div className="header-left">
+      <div className="header-inner">
         <Link
           className="logo"
           to="/"
           aria-label="Hermanos Jota - Inicio"
+          onClick={cerrarMenu}
         >
           <img src="/img/logo.svg" alt="Hermanos Jota" />
         </Link>
-        <nav className="nav">
-          <NavLink
-            to="/"
-            end
+
+        <div className="header-actions">
+          <Link
+            to="/carrito"
             role="button"
-            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+            className="cart-link"
+            aria-label="Ver carrito de compras"
+            onClick={cerrarMenu}
           >
-            Inicio
-          </NavLink>
-          <NavLink
-            to="/productos"
-            role="button"
-            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+            <img src="/img/logo-compras.png" alt="Carrito de compras" className="cart-icon" />
+            <span id="cart-count" className="cart-badge">{cantidadCarrito}</span>
+          </Link>
+
+          {/* Botón hamburguesa — solo visible en mobile */}
+          <button
+            className={`hamburger${menuAbierto ? ' is-open' : ''}`}
+            aria-label={menuAbierto ? 'Cerrar menú' : 'Abrir menú'}
+            aria-expanded={menuAbierto}
+            onClick={() => setMenuAbierto((v) => !v)}
           >
-            Catálogo
-          </NavLink>
-          <NavLink
-            to="/contacto"
-            role="button"
-            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-          >
-            Contacto
-          </NavLink>
-        </nav>
+            <span />
+            <span />
+            <span />
+          </button>
+        </div>
       </div>
-      <div className="header-right">
-        <Link
-          to="/carrito"
+
+      {/* Nav — collapsa en mobile, inline en desktop */}
+      <nav className={`nav${menuAbierto ? ' nav-open' : ''}`}>
+        <NavLink
+          to="/"
+          end
           role="button"
-          className="cart-link"
-          aria-label="Ver carrito de compras"
+          className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
+          onClick={cerrarMenu}
         >
-          <img src="/img/logo-compras.png" alt="Carrito de compras" className="cart-icon" />
-          <span id="cart-count" className="cart-badge">{cantidadCarrito}</span>
-        </Link>
-      </div>
+          Inicio
+        </NavLink>
+        <NavLink
+          to="/productos"
+          role="button"
+          className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
+          onClick={cerrarMenu}
+        >
+          Catálogo
+        </NavLink>
+        <NavLink
+          to="/contacto"
+          role="button"
+          className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
+          onClick={cerrarMenu}
+        >
+          Contacto
+        </NavLink>
+      </nav>
     </header>
   );
 }
