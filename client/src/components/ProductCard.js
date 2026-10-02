@@ -37,6 +37,7 @@ function ProductCard({ producto, onSelect, onAddToCart }) {
         aria-label={`Ver detalle de ${nombre}`}
       >
         <div className="product-image">
+          <span className="product-badge">{categoria}</span>
           <img src={imageSrc} alt={nombre} />
         </div>
         <div className="product-info">
