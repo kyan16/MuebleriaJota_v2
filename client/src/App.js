@@ -6,6 +6,7 @@ import ProductList from './components/ProductList';
 import ProductDetail from './components/ProductDetail';
 import ContactForm from './components/ContactForm';
 import Cart from './components/Cart';
+import ScrollToTop from './components/ScrollToTop';
 
 // Componente para la página de inicio
 function HomePage({ productos, onAddToCart, onSelectProduct, cargando, error, onReintentar }) {
@@ -85,22 +86,47 @@ function ProductosPage({ productos, onAddToCart, onSelectProduct, cargando, erro
 }
 
 // Componente para la página de detalle de producto según id de la ruta
-function ProductoDetallePage({ productos, onAddToCart, productoSeleccionado }) {
+function ProductoDetallePage({ productos, onAddToCart, cargando, error, onReintentar }) {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const producto =
-    productoSeleccionado ||
-    (id ? productos.find((p) => String(p.id) === String(id)) : null);
+  // El id de la URL es la única fuente de verdad del producto en detalle
+  const producto = id
+    ? productos.find((p) => String(p.id) === String(id)) || null
+    : null;
+
+  // Mientras la API no responde todavía no se puede afirmar que el id no exista:
+  // mostrar "no encontrado" acá produce un destello antes del producto real.
+  if (cargando) {
+    return (
+      <div className="product-detail-container">
+        <p className="grid-status" role="status">
+          Cargando producto...
+        </p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="product-detail-container">
+        <div className="grid-status" role="alert">
+          <p>{error}</p>
+          {onReintentar && (
+            <button type="button" className="btn" onClick={onReintentar}>
+              REINTENTAR
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <ProductDetail
       producto={producto}
       onAddToCart={onAddToCart}
-      onBack={() => {
-        navigate('/productos');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }}
+      onBack={() => navigate('/productos')}
     />
   );
 }
@@ -149,7 +175,6 @@ function CarritoPage({
           else if (destino === 'inicio') navigate('/');
           else if (destino === 'contacto') navigate('/contacto');
           else navigate(`/${destino}`);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
         onAgregar={onAddToCart}
         onQuitarUnidad={onQuitarUnidad}
@@ -192,9 +217,6 @@ function AppContent() {
     cargarProductos(controlador.signal);
     return () => controlador.abort();
   }, [cargarProductos]);
-
-  // Estado del producto seleccionado para vista de detalle
-  const [productoSeleccionado, setProductoSeleccionado] = useState(null);
 
   // Registro de actividad del proyecto para dejar seguimiento en GitHub.
   // Clave de almacenamiento en localStorage
@@ -249,9 +271,7 @@ function AppContent() {
   };
 
   const handleSelectProduct = (producto) => {
-    setProductoSeleccionado(producto);
     navigate(`/productos/${producto.id}`);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // Cálculo de resumen del carrito
@@ -275,6 +295,7 @@ function AppContent() {
 
   return (
     <div className="App">
+      <ScrollToTop />
       <Navbar cantidadCarrito={carrito.length} />
 
       <main>
@@ -311,7 +332,9 @@ function AppContent() {
               <ProductoDetallePage
                 productos={productos}
                 onAddToCart={handleAddToCart}
-                productoSeleccionado={productoSeleccionado}
+                cargando={cargando}
+                error={error}
+                onReintentar={() => cargarProductos()}
               />
             }
           />
