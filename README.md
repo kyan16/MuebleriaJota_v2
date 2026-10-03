@@ -10,7 +10,7 @@
 ![Express](https://img.shields.io/badge/Express-5-000000?logo=express&logoColor=white)
 ![Jest](https://img.shields.io/badge/Jest-tested-C21325?logo=jest&logoColor=white)
 
-Proyecto académico — Sprint 4
+Proyecto académico — Sprint 3 y 4
 
 </div>
 
