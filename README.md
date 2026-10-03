@@ -26,11 +26,11 @@ Reconstruye, en arquitectura cliente-servidor, el sitio estático original hecho
 
 | Nombre | GitHub |
 |---|---|
-|  |  |
-|  |  |
-|  |  |
-|  |  |
-|  |  |
+| Lian Rivera | kyan16 |
+| Axel Ceballes | AxelCeballes |
+| Francisco Ramirez | FranR27 |
+| Tomás Fioravanti | Tomas-ui |
+| Tomás Gonzales | tsgexe |
 
 ## ✨ Funcionalidades
 
