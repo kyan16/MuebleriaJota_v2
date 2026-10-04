@@ -1,3 +1,50 @@
+function animarProductoAlCarrito(boton, badge) {
+  if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+
+  const contenedor = boton?.closest('.product-card, .product-detail-container');
+  const imagen = contenedor?.querySelector('.product-image img, .detail-image img');
+
+  if (!imagen || !badge || typeof imagen.animate !== 'function') return;
+
+  const origen = imagen.getBoundingClientRect();
+  const destino = badge.getBoundingClientRect();
+
+  if (!origen.width || !origen.height || !destino.width || !destino.height) return;
+
+  const escala = Math.min(destino.width / origen.width, destino.height / origen.height);
+  const x = destino.left + destino.width / 2 - origen.left - (origen.width * escala) / 2;
+  const y = destino.top + destino.height / 2 - origen.top - (origen.height * escala) / 2;
+  const imagenAnimada = imagen.cloneNode();
+
+  imagenAnimada.setAttribute('alt', '');
+  imagenAnimada.setAttribute('aria-hidden', 'true');
+  imagenAnimada.removeAttribute('id');
+  imagenAnimada.classList.add('cart-flying-image');
+  Object.assign(imagenAnimada.style, {
+    left: `${origen.left}px`,
+    top: `${origen.top}px`,
+    width: `${origen.width}px`,
+    height: `${origen.height}px`,
+  });
+  document.body.appendChild(imagenAnimada);
+
+  const animacion = imagenAnimada.animate(
+    [
+      { transform: 'translate3d(0, 0, 0) scale(1)', opacity: 1 },
+      { transform: `translate3d(${x}px, ${y}px, 0) scale(${escala})`, opacity: 0.5 },
+    ],
+    {
+      duration: 650,
+      easing: 'cubic-bezier(0.22, 0.61, 0.36, 1)',
+      fill: 'forwards',
+    }
+  );
+
+  const limpiarImagen = () => imagenAnimada.remove();
+  animacion.onfinish = limpiarImagen;
+  animacion.oncancel = limpiarImagen;
+}
+
 export function activarFeedbackCarrito(boton) {
   const badge = document.getElementById('cart-count');
 
@@ -12,6 +59,8 @@ export function activarFeedbackCarrito(boton) {
     void boton.offsetWidth;
     boton.classList.add('cart-add-feedback');
   }
+
+  animarProductoAlCarrito(boton, badge);
 
   const AudioContexto = window.AudioContext || window.webkitAudioContext;
   if (!AudioContexto) return;

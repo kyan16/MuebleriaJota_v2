@@ -489,6 +489,16 @@ h2,
   animation: cart-add-feedback .5s ease;
 }
 
+.cart-flying-image {
+  position: fixed;
+  z-index: 1000;
+  pointer-events: none;
+  object-fit: contain;
+  transform-origin: top left;
+  filter: drop-shadow(0 4px 8px var(--texto-35));
+  will-change: transform, opacity;
+}
+
 @keyframes cart-add-feedback {
   0%   { transform: scale(1); }
   35%  { transform: scale(.94); }
@@ -1470,6 +1480,8 @@ h2,
    -------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   .cart-add-feedback,
+  .cart-badge.cart-bump,
+  .cart-flying-image,
   .cart-buy,
   .cart-purchase-message,
   .product-card {
