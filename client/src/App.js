@@ -203,6 +203,12 @@ function AppContent() {
         throw new Error(`Error ${respuesta.status} al pedir los productos`);
       }
       const datos = await respuesta.json();
+      // La app trabaja siempre contra un listado: si la API contesta 200 pero
+      // con otra forma de dato, se trata como error en lugar de guardar algo
+      // que rompería el catálogo al renderizar.
+      if (!Array.isArray(datos)) {
+        throw new Error('La respuesta de la API no es un listado de productos');
+      }
       setProductos(datos);
     } catch (err) {
       if (err.name === 'AbortError') return;
@@ -222,6 +228,11 @@ function AppContent() {
   // Clave de almacenamiento en localStorage
   const STORAGE_KEY = 'carrito';
 
+  // Un id del carrito solo es válido si es un entero positivo. Descartar el resto
+  // evita que un localStorage editado a mano deje botones que no pueden quitar
+  // unidades (por ejemplo, ids guardados como texto: "3").
+  const esIdValido = (id) => Number.isInteger(id) && id > 0;
+
   // Estado del carrito: inicializado desde localStorage de manera segura
   const [carrito, setCarrito] = useState(() => {
     try {
@@ -229,7 +240,7 @@ function AppContent() {
       if (guardado) {
         const parseado = JSON.parse(guardado);
         if (Array.isArray(parseado)) {
-          return parseado;
+          return parseado.filter(esIdValido);
         }
       }
     } catch (err) {
@@ -280,6 +291,9 @@ function AppContent() {
     return acc;
   }, {});
 
+  // Los productos inexistentes (por ejemplo, un id guardado de una versión
+  // anterior del catálogo) se descartan de la vista y no se cuentan como
+  // unidades: el contador y el total tienen que coincidir con lo que se ve.
   const itemsCarrito = Object.keys(cantidadesCarrito)
     .map((idStr) => {
       const id = Number(idStr);
@@ -287,6 +301,8 @@ function AppContent() {
       return prod ? { producto: prod, cantidad: cantidadesCarrito[id] } : null;
     })
     .filter(Boolean);
+
+  const totalUnidades = itemsCarrito.reduce((sum, item) => sum + item.cantidad, 0);
 
   const totalCarrito = itemsCarrito.reduce(
     (sum, item) => sum + item.producto.precio * item.cantidad,
@@ -296,7 +312,7 @@ function AppContent() {
   return (
     <div className="App">
       <ScrollToTop />
-      <Navbar cantidadCarrito={carrito.length} />
+      <Navbar cantidadCarrito={totalUnidades} />
 
       <main>
         <Routes>
@@ -347,7 +363,7 @@ function AppContent() {
             element={
               <CarritoPage
                 itemsCarrito={itemsCarrito}
-                totalUnidades={carrito.length}
+                totalUnidades={totalUnidades}
                 totalCarrito={totalCarrito}
                 onAddToCart={handleAddToCart}
                 onQuitarUnidad={handleQuitarUnidad}

@@ -238,6 +238,70 @@ describe('Hermanos Jota — Componentes, navegación y API', () => {
     expect(await screen.findByText('Butaca Mendoza')).toBeInTheDocument();
     expect(document.querySelector('#cart-count')).toHaveTextContent('0');
   });
+
+  test('Fetch: una respuesta 200 que no es un array se muestra como error y no rompe la app', async () => {
+    global.fetch = jest.fn(() =>
+      Promise.resolve({ ok: true, json: () => Promise.resolve({ mensaje: 'no soy un listado' }) })
+    );
+
+    render(<App />);
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/no pudimos cargar el catálogo/i);
+
+    // La navegación sigue respondiendo: no hay pantalla en blanco
+    fireEvent.click(screen.getByRole('button', { name: /^catálogo$/i }));
+    expect(screen.getByPlaceholderText(/ej: sillón, mesa, silla/i)).toBeInTheDocument();
+  });
+
+  test('Fetch: una respuesta 200 con null también se trata como error', async () => {
+    global.fetch = jest.fn(() =>
+      Promise.resolve({ ok: true, json: () => Promise.resolve(null) })
+    );
+
+    render(<App />);
+
+    expect(await screen.findByRole('alert')).toBeInTheDocument();
+  });
+
+  test('Carrito: los ids que no existen en el catálogo no se muestran ni cuentan como unidades', async () => {
+    window.localStorage.setItem('carrito', JSON.stringify([3, 999]));
+
+    await renderApp();
+
+    // Solo la Butaca Mendoza (id 3) es válida
+    expect(document.querySelector('#cart-count')).toHaveTextContent('1');
+
+    fireEvent.click(screen.getByRole('button', { name: /ver carrito de compras/i }));
+
+    expect(screen.getByText('Butaca Mendoza')).toBeInTheDocument();
+    expect(document.querySelector('#cart-summary-count')).toHaveTextContent('1');
+    expect(document.querySelector('#cart-total')).toHaveTextContent(/380\.000/);
+    expect(screen.getAllByRole('button', { name: /quitar una unidad/i })).toHaveLength(1);
+  });
+
+  test('Carrito: se descartan los ids guardados que no son enteros positivos', async () => {
+    window.localStorage.setItem('carrito', JSON.stringify(['3', 'abc', null, 0, -2, 3, 3]));
+
+    await renderApp();
+
+    expect(JSON.parse(window.localStorage.getItem('carrito'))).toEqual([3, 3]);
+    expect(document.querySelector('#cart-count')).toHaveTextContent('2');
+  });
+
+  test('Carrito: sin datos de la API el resumen queda en 0 unidades sin romperse', async () => {
+    window.localStorage.setItem('carrito', JSON.stringify([1, 2]));
+    global.fetch = jest.fn(() => Promise.reject(new Error('sin conexión')));
+
+    render(<App />);
+    await screen.findByRole('alert');
+
+    fireEvent.click(screen.getByRole('button', { name: /ver carrito de compras/i }));
+
+    expect(screen.getByText(/tu carrito está vacío/i)).toBeInTheDocument();
+    expect(document.querySelector('#cart-count')).toHaveTextContent('0');
+    expect(document.querySelector('#cart-summary-count')).toHaveTextContent('0');
+    expect(screen.getByRole('button', { name: /comprar/i })).toBeDisabled();
+  });
 });
 
 
