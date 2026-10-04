@@ -1,0 +1,11 @@
+# Normaliza los finales de línea a LF en el repositorio y en cada checkout.
+# Sin esto, guardar desde un editor de Windows introduce CRLF y cada archivo
+# aparece como modificado por completo, tapando los cambios reales.
+* text=auto eol=lf
+
+# Binarios: git no debe intentar interpretarlos como texto
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
