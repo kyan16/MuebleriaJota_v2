@@ -35,7 +35,8 @@ Esta versión reemplaza a la v1 (HTML/CSS/JS vanilla). **Las reglas "vanilla pur
 backend/
   app.js                   # servidor + middlewares globales + 404 + errores (puerto: PORT || 5000)
   data/productos.js        # fuente de datos
-  routes/productos.js      # GET / y GET /:id
+  controllers/             # lógica de los endpoints (obtenerProductos, obtenerProductoPorId)
+  routes/productos.js      # solo define los endpoints y delega en el controller
   routes/productos.test.js # tests del backend (node --test)
   middlewares/logger.js
 client/
@@ -56,14 +57,14 @@ client/
       cartFeedback.js         # animación + sonido al añadir al carrito
     App.test.js
 ```
-La carpeta `/img` de la raíz es una copia de los recursos originales; **la app usa `client/public/img`**. No debe existir `client/src/data/` (ver punto 0.2).
+Las imágenes vivas están **solo** en `client/public/img` (productos y logos, se piden como `/img/<archivo>`) y en `client/src/assets` (fondo del hero, importado desde el CSS). La antigua carpeta `/img` de la raíz se eliminó por ser una copia sin uso: no volver a crearla ni usarla como fuente de imágenes. No debe existir `client/src/data/` (ver punto 0.2).
 
 ## 4. Contrato de la API (no romper)
 
 | Método | Ruta | Respuesta |
 |---|---|---|
 | GET | `/api/productos` | `200` arreglo de productos |
-| GET | `/api/productos/:id` | `200` producto · `404 { mensaje: "Producto no encontrado" }` |
+| GET | `/api/productos/:id` | `200` producto · `400 { mensaje: "ID de producto inválido: debe ser un número entero" }` si el id no es un entero positivo · `404 { mensaje: "Producto no encontrado" }` |
 | otras | — | `404 { mensaje: "Ruta no encontrada" }` |
 | error | — | `500 { mensaje: "Ocurrió un error en el servidor" }` |
 
